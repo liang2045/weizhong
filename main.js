@@ -2,7 +2,6 @@ const { app, BrowserWindow, dialog, ipcMain, shell } = require("electron");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { fileURLToPath, pathToFileURL } = require("node:url");
-const { fileURLToPath } = require("node:url");
 
 function resolveSharedPath(location) {
   if (!location) return "";
@@ -74,9 +73,6 @@ ipcMain.handle("open-resource", async (_event, { url, isCloudLink }) => {
   }
 
   return openLocalFolder(url);
-  const errorMessage = await shell.openPath(resolveLocalFolderPath(url));
-  if (errorMessage) throw new Error(`无法打开本地文件夹：${errorMessage}`);
-  return { ok: true };
 });
 
 ipcMain.handle("read-sync-file", async (_event, location) => {

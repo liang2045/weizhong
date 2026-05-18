@@ -6,14 +6,10 @@ const RESOURCE_BUTTONS = ["详情页", "主图", "SKU", "白底图", "网盘链�
 const CLOUD_LINK_LABEL = "网盘链接";
 const isDesktopApp = Boolean(window.huazaiDesktop);
 
-const RESOURCE_BUTTONS = ["详情页", "主图", "SKU", "白底图", "网盘链接", "产品资料"];
-const CLOUD_LINK_LABEL = "网盘链接";
-
 const placeholderSvg = encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
   <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#C8102E"/><stop offset="1" stop-color="#222222"/></linearGradient></defs>
   <rect width="900" height="650" fill="#e7e7ea"/>
-  <rect width="900" height="650" fill="#f7f7f8"/>
   <circle cx="720" cy="120" r="180" fill="#fff1f3"/>
   <rect x="170" y="160" width="560" height="330" rx="44" fill="url(#g)" opacity="0.95"/>
   <path d="M270 415l110-125 90 95 70-76 100 106z" fill="#fff" opacity="0.88"/>
@@ -57,8 +53,6 @@ const chooseSyncFileBtn = document.querySelector("#chooseSyncFileBtn");
 syncUrlEl.value = localStorage.getItem(SYNC_KEY) || (isDesktopApp ? "" : "./products.json");
 applyTheme(localStorage.getItem(THEME_KEY) || "light");
 renderDesktopState();
-
-syncUrlEl.value = localStorage.getItem(SYNC_KEY) || "./products.json";
 renderLinkFields();
 renderCards();
 
@@ -92,8 +86,6 @@ async function publishSharedConfig() {
 
 function setSyncStatus(message) {
   syncStatusEl.textContent = message;
-function persist() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ updatedAt: new Date().toISOString(), products }, null, 2));
 }
 
 function normalizeProduct(product) {
@@ -131,7 +123,6 @@ function renderCards() {
       button.className = "resource-button";
       button.textContent = label;
       button.classList.toggle("is-unconfigured", !product.links[label]);
-      button.disabled = !product.links[label];
       button.title = product.links[label] || "请先在设置中配置地址";
       button.addEventListener("click", () => openResource(label, product.links[label]));
       buttonGrid.append(button);
@@ -178,16 +169,6 @@ async function openResource(label, url) {
 
   const openedWindow = window.open(targetUrl, "_blank", "noopener,noreferrer");
   if (!openedWindow) alert(`浏览器阻止了“${label}”弹出窗口，请允许弹窗或使用桌面端。`);
-function openResource(label, url) {
-  if (!url) return;
-  const isCloudLink = label === CLOUD_LINK_LABEL;
-  const targetUrl = isCloudLink || isDesktopApp ? url.trim() : toLocalResourceUrl(url);
-  if (isDesktopApp) {
-    window.huazaiDesktop.openResource({ label, url: targetUrl, isCloudLink }).catch((error) => alert(error.message));
-    return;
-  }
-  const targetUrl = label === CLOUD_LINK_LABEL ? url : toLocalResourceUrl(url);
-  window.open(targetUrl, "_blank", "noopener,noreferrer");
 }
 
 function toLocalResourceUrl(rawUrl) {
@@ -229,7 +210,6 @@ function renderLinkFields() {
     const input = document.createElement("input");
     input.name = label;
     input.placeholder = label === CLOUD_LINK_LABEL ? "填写在线网盘分享 URL" : "填写本地 NAS / 共享盘文件夹路径";
-    input.placeholder = label === CLOUD_LINK_LABEL ? "填写在线网盘分享 URL" : "填写本地 NAS / 共享盘路径或 file:// 地址";
     field.append(input);
     linkFieldsEl.append(field);
   });
@@ -334,20 +314,11 @@ async function updateFromRemote() {
   persist({ publish: false });
   renderCards();
   setSyncStatus("更新完成，已同步最新产品卡片。");
-  const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) throw new Error(`同步失败：${response.status}`);
-  const payload = await response.json();
-  const nextProducts = Array.isArray(payload) ? payload : payload.products;
-  if (!Array.isArray(nextProducts)) throw new Error("同步文件格式错误，需要 products 数组。");
-  products = nextProducts.map(normalizeProduct);
-  persist();
-  renderCards();
   alert("更新完成，已同步最新产品卡片。");
 }
 
 function exportConfig() {
   const blob = new Blob([buildConfigPayload()], { type: "application/json" });
-  const blob = new Blob([JSON.stringify({ updatedAt: new Date().toISOString(), products }, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = "products.json";
@@ -388,7 +359,6 @@ async function chooseSyncFile() {
 
 document.querySelector("#appSettingsBtn").addEventListener("click", () => document.querySelector("#settingsDialog").showModal());
 themeToggleBtn.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
-document.querySelector("#appSettingsBtn").addEventListener("click", () => document.querySelector("#settingsDialog").showModal());
 document.querySelector("#newCardBtn").addEventListener("click", () => openDialog());
 document.querySelector("#saveCardBtn").addEventListener("click", saveCard);
 document.querySelector("#deleteBtn").addEventListener("click", deleteCard);
@@ -403,8 +373,6 @@ document.querySelector("#saveSyncBtn").addEventListener("click", () => {
   });
 });
 chooseSyncFileBtn.addEventListener("click", () => chooseSyncFile().catch((error) => alert(error.message)));
-  alert("同步地址已保存。");
-});
 document.querySelector("#updateBtn").addEventListener("click", () => updateFromRemote().catch((error) => alert(error.message)));
 document.querySelector("#exportBtn").addEventListener("click", exportConfig);
 document.querySelector("#importInput").addEventListener("change", (event) => importConfig(event.target.files[0]).catch((error) => alert(error.message)));

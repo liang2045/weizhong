@@ -1,0 +1,19 @@
+{
+  "updatedAt": "2026-05-18T00:00:00.000Z",
+  "products": [
+    {
+      "id": "demo-smart-handle-a1",
+      "name": "新品智能手柄 A1",
+      "price": "定价：¥299 / 批发价详询",
+      "image": "",
+      "links": {
+        "详情页": "file:///Volumes/NAS/Products/A1/detail",
+        "主图": "file:///Volumes/NAS/Products/A1/main-image",
+        "SKU": "file:///Volumes/NAS/Products/A1/sku",
+        "白底图": "file:///Volumes/NAS/Products/A1/white-bg",
+        "网盘链接": "https://example.com/share/a1",
+        "产品资料": "file:///Volumes/NAS/Products/A1/documents"
+      }
+    }
+  ]
+}

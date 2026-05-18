@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>花再产品库</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -27,6 +31,7 @@
         <div>
           <strong id="cardCount">0 个产品</strong>
           <span id="syncStatus">桌面窗口可缩放；任意客户端保存到共享配置后，其他安装者点击“更新”同步。</span>
+          <span>点击右上角“设置”可配置团队同步地址、查看拖动说明、导入或导出配置。</span>
         </div>
       </section>
 
@@ -52,6 +57,11 @@
             <input id="syncUrl" placeholder="例如：Z:\Huazai\products.json、\\NAS\Huazai\products.json 或 https://company.example.com/products.json" />
             <button id="chooseSyncFileBtn" class="btn btn-secondary desktop-only" type="button">选择文件</button>
             <button id="saveSyncBtn" class="btn btn-dark" type="button">保存并发布</button>
+          <p>管理员把导出的产品 JSON 放到共享地址，其他同事点击“更新”即可同步新增或修改的卡片。</p>
+          <label for="syncUrl">同步 JSON 地址</label>
+          <div class="sync-row">
+            <input id="syncUrl" type="url" placeholder="例如：https://company.example.com/products.json 或 ./products.json" />
+            <button id="saveSyncBtn" class="btn btn-dark" type="button">保存地址</button>
           </div>
         </section>
 
@@ -99,6 +109,7 @@
         <fieldset>
           <legend>按钮地址配置</legend>
           <p class="field-hint">除“网盘链接”外，请填写本地 NAS / 共享盘文件夹地址，点击按钮会直接弹出本地文件夹，例如 <code>\\NAS\Products\A1</code>、<code>Z:\Products\A1</code> 或 <code>/Volumes/NAS/Products/A1</code>。</p>
+          <p class="field-hint">除“网盘链接”外，请优先填写本地 NAS / 共享盘路径，例如 <code>\\NAS\Products\A1</code>、<code>Z:\Products\A1</code> 或 <code>file:///Volumes/NAS/Products/A1</code>。</p>
           <div id="linkFields" class="link-fields"></div>
         </fieldset>
 

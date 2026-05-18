@@ -7,7 +7,7 @@
       "price": "定价：¥299 / 批发价详询",
       "image": "",
       "links": {
-        "详情页": "https://example.com/product/a1",
+        "详情页": "file:///Volumes/NAS/Products/A1/detail",
         "主图": "file:///Volumes/NAS/Products/A1/main-image",
         "SKU": "file:///Volumes/NAS/Products/A1/sku",
         "白底图": "file:///Volumes/NAS/Products/A1/white-bg",

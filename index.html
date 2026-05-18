@@ -102,8 +102,16 @@
           <div id="linkFields" class="link-fields"></div>
         </fieldset>
 
-        <div class="dialog-actions">
+        <section id="deleteCardSection" class="danger-section" hidden>
+          <div>
+            <h3>删除卡片</h3>
+            <p>从产品库中移除这张卡片，并同步到团队共享配置。</p>
+          </div>
           <button id="deleteBtn" class="btn btn-danger" type="button">删除卡片</button>
+        </section>
+
+        <div class="dialog-actions">
+          <div></div>
           <div>
             <button class="btn btn-secondary" value="cancel" type="submit">取消</button>
             <button id="saveCardBtn" class="btn btn-primary" type="button">保存</button>

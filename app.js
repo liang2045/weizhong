@@ -49,6 +49,9 @@ const imagePreviewEl = document.querySelector("#imagePreview");
 const syncUrlEl = document.querySelector("#syncUrl");
 const themeToggleBtn = document.querySelector("#themeToggleBtn");
 const chooseSyncFileBtn = document.querySelector("#chooseSyncFileBtn");
+const editingIdInput = document.querySelector("#editingId");
+const productNameInput = document.querySelector("#productName");
+const deleteCardSection = document.querySelector("#deleteCardSection");
 
 syncUrlEl.value = localStorage.getItem(SYNC_KEY) || (isDesktopApp ? "" : "./products.json");
 applyTheme(localStorage.getItem(THEME_KEY) || "light");
@@ -218,16 +221,24 @@ function renderLinkFields() {
 function openDialog(id) {
   const product = products.find((item) => item.id === id) || normalizeProduct({ links: {} });
   document.querySelector("#dialogTitle").textContent = id ? "设置产品卡片" : "新建产品卡片";
-  document.querySelector("#editingId").value = id || "";
-  document.querySelector("#productName").value = id ? product.name : "";
+  editingIdInput.value = id || "";
+  productNameInput.value = id ? product.name : "";
   document.querySelector("#productPrice").value = id ? product.price : "";
   document.querySelector("#productImage").value = "";
   showPreview(id ? product.image : "");
   RESOURCE_BUTTONS.forEach((label) => {
     linkFieldsEl.querySelector(`[name="${label}"]`).value = id ? product.links[label] || "" : "";
   });
-  document.querySelector("#deleteBtn").hidden = !id;
+  deleteCardSection.hidden = !id;
   dialog.showModal();
+}
+
+function canCloseCardDialog() {
+  const isNewCard = !editingIdInput.value;
+  if (!isNewCard || productNameInput.value.trim()) return true;
+  productNameInput.reportValidity();
+  alert("新建卡片必须填写产品名后才能关闭。");
+  return false;
 }
 
 function showPreview(src) {
@@ -253,13 +264,13 @@ function readImageFile(file) {
 }
 
 async function saveCard() {
-  const id = document.querySelector("#editingId").value;
+  const id = editingIdInput.value;
   const existing = products.find((product) => product.id === id);
   const imageFile = document.querySelector("#productImage").files[0];
   const uploadedImage = await readImageFile(imageFile);
   const nextProduct = normalizeProduct({
     id: id || crypto.randomUUID(),
-    name: document.querySelector("#productName").value.trim(),
+    name: productNameInput.value.trim(),
     price: document.querySelector("#productPrice").value.trim(),
     image: uploadedImage || existing?.image || PLACEHOLDER_IMAGE,
     links: RESOURCE_BUTTONS.reduce((links, label) => {
@@ -269,7 +280,7 @@ async function saveCard() {
   });
 
   if (!nextProduct.name) {
-    document.querySelector("#productName").reportValidity();
+    productNameInput.reportValidity();
     return;
   }
 
@@ -284,7 +295,7 @@ async function saveCard() {
 }
 
 function deleteCard() {
-  const id = document.querySelector("#editingId").value;
+  const id = editingIdInput.value;
   if (!id || !confirm("确认删除这张产品卡片吗？")) return;
   products = products.filter((product) => product.id !== id);
   persist();
@@ -377,6 +388,13 @@ document.querySelector("#updateBtn").addEventListener("click", () => updateFromR
 document.querySelector("#exportBtn").addEventListener("click", exportConfig);
 document.querySelector("#importInput").addEventListener("change", (event) => importConfig(event.target.files[0]).catch((error) => alert(error.message)));
 form.addEventListener("submit", (event) => {
-  if (event.submitter?.value === "cancel") return;
+  if (event.submitter?.value === "cancel") {
+    if (!canCloseCardDialog()) event.preventDefault();
+    return;
+  }
   event.preventDefault();
+});
+
+dialog.addEventListener("cancel", (event) => {
+  if (!canCloseCardDialog()) event.preventDefault();
 });

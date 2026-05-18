@@ -15,9 +15,10 @@
 ## 打包 EXE
 
 1. 在 Windows 电脑上执行 `npm install` 安装依赖。
-2. 执行 `npm run dist:win` 生成 Windows 可执行文件。
+2. 执行 `npm run exe`（等同于 `npm run dist:win`）生成 Windows 可执行文件。
 3. 打包完成后，`dist/` 目录会生成安装版 `花再产品库-Setup-1.0.0-x64.exe` 和便携版 `花再产品库-Portable-1.0.0-x64.exe`；把 EXE 发给同事安装或直接运行即可。
-4. 如需改版本号，请先修改 `package.json` 里的 `version`，再重新执行 `npm run dist:win`。
+4. 如需改版本号，请先修改 `package.json` 里的 `version`，再重新执行 `npm run exe`。
+5. 也可以在 GitHub Actions 手动运行 `Build Windows EXE` 工作流，完成后从 Artifacts 下载 EXE。
 
 ## 团队同步方式
 

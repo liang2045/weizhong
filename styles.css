@@ -274,6 +274,7 @@ main { padding: 0 clamp(1rem, 5vw, 5rem) 4rem; }
 }
 
 .resource-button:hover { color: var(--brand); background: var(--surface); box-shadow: 0 12px 22px rgba(34, 34, 34, 0.09); }
+.resource-button.is-unconfigured { opacity: 0.58; }
 .resource-button:hover { color: var(--brand); background: var(--white); box-shadow: 0 12px 22px rgba(34, 34, 34, 0.09); }
 .resource-button[disabled] { cursor: not-allowed; opacity: 0.45; }
 

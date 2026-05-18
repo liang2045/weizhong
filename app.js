@@ -130,6 +130,7 @@ function renderCards() {
       button.type = "button";
       button.className = "resource-button";
       button.textContent = label;
+      button.classList.toggle("is-unconfigured", !product.links[label]);
       button.disabled = !product.links[label];
       button.title = product.links[label] || "请先在设置中配置地址";
       button.addEventListener("click", () => openResource(label, product.links[label]));
@@ -156,6 +157,27 @@ function renderCards() {
   });
 }
 
+async function openResource(label, url) {
+  const rawUrl = url?.trim();
+  if (!rawUrl) {
+    alert(`请先在卡片设置中配置“${label}”地址。`);
+    return;
+  }
+
+  const isCloudLink = label === CLOUD_LINK_LABEL;
+  const targetUrl = isCloudLink || isDesktopApp ? rawUrl : toLocalResourceUrl(rawUrl);
+  if (isDesktopApp) {
+    try {
+      const result = await window.huazaiDesktop.openResource({ label, url: targetUrl, isCloudLink });
+      if (result?.ok === false) alert(result.message || `无法打开“${label}”。`);
+    } catch (error) {
+      alert(error.message || `无法打开“${label}”。`);
+    }
+    return;
+  }
+
+  const openedWindow = window.open(targetUrl, "_blank", "noopener,noreferrer");
+  if (!openedWindow) alert(`浏览器阻止了“${label}”弹出窗口，请允许弹窗或使用桌面端。`);
 function openResource(label, url) {
   if (!url) return;
   const isCloudLink = label === CLOUD_LINK_LABEL;

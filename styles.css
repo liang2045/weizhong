@@ -4,8 +4,14 @@
   --ink: #222222;
   --muted: #6f6f76;
   --bg: #f7f7f8;
-  --line: #e8e8ec;
+  --surface: #ffffff;
+  --panel: #fbfbfc;
+  --card-bg: #ececef;
+  --field-bg: #fbfbfc;
+  --line: #e1e1e5;
   --soft-red: #fff1f3;
+  --price: rgba(34, 34, 34, 0.5);
+  --glass: rgba(255, 255, 255, 0.82);
   --shadow: 0 18px 45px rgba(34, 34, 34, 0.12);
   --shadow-soft: 0 10px 28px rgba(34, 34, 34, 0.08);
   --radius: 24px;
@@ -14,13 +20,42 @@
 
 * { box-sizing: border-box; }
 
+html { color-scheme: light; }
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --white: #ffffff;
+  --ink: #f2f2f2;
+  --muted: #a5a5ab;
+  --bg: #101012;
+  --surface: #17171a;
+  --panel: #202024;
+  --card-bg: #2b2b30;
+  --field-bg: #111113;
+  --line: #34343a;
+  --soft-red: rgba(200, 16, 46, 0.16);
+  --price: rgba(255, 255, 255, 0.5);
+  --glass: rgba(23, 23, 26, 0.82);
+  --shadow: 0 22px 60px rgba(0, 0, 0, 0.36);
+  --shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(200, 16, 46, 0.12), transparent 32rem),
-    linear-gradient(180deg, #ffffff 0%, var(--bg) 42%);
+    radial-gradient(circle at top left, rgba(200, 16, 46, 0.16), transparent 30rem),
+    radial-gradient(circle at bottom right, rgba(34, 34, 34, 0.12), transparent 34rem),
+    linear-gradient(180deg, var(--surface) 0%, var(--bg) 46%);
+}
+
+.window-shell {
+  width: min(100%, 1680px);
+  min-height: 100vh;
+  margin: 0 auto;
+  resize: both;
+  overflow: auto;
 }
 
 button, input { font: inherit; }
@@ -52,12 +87,6 @@ h1 {
   letter-spacing: -0.05em;
 }
 
-.subtitle {
-  max-width: 43rem;
-  margin: 1rem 0 0;
-  color: var(--muted);
-  font-size: 1.05rem;
-}
 
 .header-actions,
 .toolbar-actions,
@@ -95,14 +124,14 @@ h1 {
   box-shadow: 0 12px 25px rgba(200, 16, 46, 0.24);
 }
 
-.btn-secondary { background: var(--white); color: var(--ink); border: 1px solid var(--line); }
+.btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
 .btn-dark { background: var(--ink); color: var(--white); }
 .btn-danger { background: #ffe1e6; color: var(--brand); }
 
 main { padding: 0 clamp(1rem, 5vw, 5rem) 4rem; }
 
 .toolbar {
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--glass);
   border: 1px solid var(--line);
   border-radius: 22px;
   box-shadow: 0 12px 32px rgba(34, 34, 34, 0.06);
@@ -145,8 +174,8 @@ main { padding: 0 clamp(1rem, 5vw, 5rem) 4rem; }
   gap: 1.1rem;
   min-height: 360px;
   padding: 0.85rem;
-  background: var(--white);
-  border: 1px solid rgba(232, 232, 236, 0.9);
+  background: var(--card-bg);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
   overflow: hidden;
@@ -168,7 +197,7 @@ main { padding: 0 clamp(1rem, 5vw, 5rem) 4rem; }
   border: 1px solid var(--line);
   border-radius: 18px;
   overflow: hidden;
-  background: var(--white);
+  background: var(--surface);
   box-shadow: inset 0 -1px 0 rgba(34, 34, 34, 0.04);
 }
 
@@ -176,7 +205,7 @@ main { padding: 0 clamp(1rem, 5vw, 5rem) 4rem; }
   position: relative;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  background: linear-gradient(145deg, #f1f1f3, #ffffff);
+  background: linear-gradient(145deg, #d9d9de, #f0f0f2);
 }
 
 .product-image {
@@ -192,20 +221,20 @@ main { padding: 0 clamp(1rem, 5vw, 5rem) 4rem; }
   justify-content: center;
   padding: 0.9rem 1rem;
   color: var(--ink);
-  background: var(--white);
+  background: var(--surface);
 }
 
 .product-meta h3 {
   font-size: 1.22rem;
   line-height: 1.25;
-  color: #222222;
+  color: var(--ink);
   font-weight: 900;
   letter-spacing: -0.02em;
 }
 
 .product-meta p {
   margin: 0.42rem 0 0;
-  color: rgba(34, 34, 34, 0.5);
+  color: var(--price);
   font-size: 0.94rem;
   font-weight: 700;
 }
@@ -224,13 +253,13 @@ main { padding: 0 clamp(1rem, 5vw, 5rem) 4rem; }
   border: 1px solid var(--line);
   border-radius: 18px;
   color: var(--ink);
-  background: #fbfbfc;
+  background: var(--panel);
   font-weight: 800;
   text-align: left;
   box-shadow: 0 1px 0 rgba(34, 34, 34, 0.03);
 }
 
-.resource-button:hover { color: var(--brand); background: var(--white); box-shadow: 0 12px 22px rgba(34, 34, 34, 0.09); }
+.resource-button:hover { color: var(--brand); background: var(--surface); box-shadow: 0 12px 22px rgba(34, 34, 34, 0.09); }
 .resource-button[disabled] { cursor: not-allowed; opacity: 0.45; }
 
 .card-controls {
@@ -260,7 +289,7 @@ main { padding: 0 clamp(1rem, 5vw, 5rem) 4rem; }
   padding: 3rem;
   text-align: center;
   color: var(--muted);
-  background: var(--white);
+  background: var(--surface);
   border: 1px dashed var(--line);
   border-radius: var(--radius);
 }
@@ -274,7 +303,7 @@ main { padding: 0 clamp(1rem, 5vw, 5rem) 4rem; }
 }
 
 .dialog::backdrop { background: rgba(34, 34, 34, 0.42); backdrop-filter: blur(4px); }
-.dialog-card { padding: 1.2rem; }
+.dialog-card { padding: 1.2rem; background: var(--surface); color: var(--ink); }
 .dialog-header { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
 
 .form-grid,
@@ -293,7 +322,7 @@ input {
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 0.78rem 0.9rem;
-  background: #fbfbfc;
+  background: var(--field-bg);
   color: var(--ink);
 }
 
@@ -329,7 +358,7 @@ input {
   padding: 1rem;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: #fbfbfc;
+  background: var(--panel);
 }
 
 .settings-section h3 {
@@ -355,3 +384,20 @@ input {
 }
 
 .settings-actions { margin-top: 0.8rem; }
+
+html[data-theme="dark"] .image-wrap {
+  background: linear-gradient(145deg, #242428, #34343a);
+}
+
+html[data-theme="dark"] .product-meta h3,
+html[data-theme="dark"] .settings-section h3 {
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .dialog::backdrop {
+  background: rgba(0, 0, 0, 0.62);
+}
+
+html:not(.is-desktop) .desktop-only {
+  display: none;
+}

@@ -1,19 +1,21 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>花再产品库</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="window-shell">
     <header class="app-header">
       <div>
         <p class="eyebrow">Huazai Product Library</p>
         <h1>花再产品库</h1>
-        <p class="subtitle">用统一卡片快速打开本地 NAS 资源、网盘链接和产品资料。</p>
       </div>
       <div class="header-actions">
+        <button id="themeToggleBtn" class="btn btn-secondary" type="button">深色模式</button>
         <button id="appSettingsBtn" class="btn btn-secondary" type="button">设置</button>
         <button id="updateBtn" class="btn btn-secondary" type="button">更新</button>
         <button id="newCardBtn" class="btn btn-primary" type="button">新建卡片</button>
@@ -24,7 +26,7 @@
       <section class="toolbar" aria-label="列表工具栏">
         <div>
           <strong id="cardCount">0 个产品</strong>
-          <span>点击右上角“设置”可配置团队同步地址、查看拖动说明、导入或导出配置。</span>
+          <span id="syncStatus">桌面窗口可缩放；任意客户端保存到共享配置后，其他安装者点击“更新”同步。</span>
         </div>
       </section>
 
@@ -44,11 +46,12 @@
 
         <section class="settings-section" aria-label="团队同步地址">
           <h3>团队同步地址</h3>
-          <p>管理员把导出的产品 JSON 放到共享地址，其他同事点击“更新”即可同步新增或修改的卡片。</p>
-          <label for="syncUrl">同步 JSON 地址</label>
+          <p>填写团队共享的 <code>products.json</code> 文件路径或 HTTP 地址。桌面端任意客户端新增、编辑、排序或导入后，会自动写回这个共享配置；其他安装者点击“更新”即可同步卡片信息。</p>
+          <label for="syncUrl">共享配置文件 / JSON 地址</label>
           <div class="sync-row">
-            <input id="syncUrl" type="url" placeholder="例如：https://company.example.com/products.json 或 ./products.json" />
-            <button id="saveSyncBtn" class="btn btn-dark" type="button">保存地址</button>
+            <input id="syncUrl" placeholder="例如：Z:\Huazai\products.json、\\NAS\Huazai\products.json 或 https://company.example.com/products.json" />
+            <button id="chooseSyncFileBtn" class="btn btn-secondary desktop-only" type="button">选择文件</button>
+            <button id="saveSyncBtn" class="btn btn-dark" type="button">保存并发布</button>
           </div>
         </section>
 
@@ -128,6 +131,7 @@
         </div>
       </article>
     </template>
+    </div>
 
     <script src="app.js"></script>
   </body>

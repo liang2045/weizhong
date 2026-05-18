@@ -1,5 +1,10 @@
 const STORAGE_KEY = "product-resource-cards:v1";
 const SYNC_KEY = "product-resource-sync-url:v1";
+const THEME_KEY = "product-resource-theme:v1";
+
+const RESOURCE_BUTTONS = ["详情页", "主图", "SKU", "白底图", "网盘链接", "产品资料"];
+const CLOUD_LINK_LABEL = "网盘链接";
+const isDesktopApp = Boolean(window.huazaiDesktop);
 
 const RESOURCE_BUTTONS = ["详情页", "主图", "SKU", "白底图", "网盘链接", "产品资料"];
 const CLOUD_LINK_LABEL = "网盘链接";
@@ -7,6 +12,7 @@ const CLOUD_LINK_LABEL = "网盘链接";
 const placeholderSvg = encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
   <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#C8102E"/><stop offset="1" stop-color="#222222"/></linearGradient></defs>
+  <rect width="900" height="650" fill="#e7e7ea"/>
   <rect width="900" height="650" fill="#f7f7f8"/>
   <circle cx="720" cy="120" r="180" fill="#fff1f3"/>
   <rect x="170" y="160" width="560" height="330" rx="44" fill="url(#g)" opacity="0.95"/>
@@ -39,11 +45,18 @@ let draggedId = null;
 const cardsEl = document.querySelector("#cards");
 const emptyStateEl = document.querySelector("#emptyState");
 const cardCountEl = document.querySelector("#cardCount");
+const syncStatusEl = document.querySelector("#syncStatus");
 const dialog = document.querySelector("#cardDialog");
 const form = document.querySelector("#cardForm");
 const linkFieldsEl = document.querySelector("#linkFields");
 const imagePreviewEl = document.querySelector("#imagePreview");
 const syncUrlEl = document.querySelector("#syncUrl");
+const themeToggleBtn = document.querySelector("#themeToggleBtn");
+const chooseSyncFileBtn = document.querySelector("#chooseSyncFileBtn");
+
+syncUrlEl.value = localStorage.getItem(SYNC_KEY) || (isDesktopApp ? "" : "./products.json");
+applyTheme(localStorage.getItem(THEME_KEY) || "light");
+renderDesktopState();
 
 syncUrlEl.value = localStorage.getItem(SYNC_KEY) || "./products.json";
 renderLinkFields();
@@ -60,6 +73,25 @@ function loadProducts() {
   }
 }
 
+function buildConfigPayload() {
+  return JSON.stringify({ updatedAt: new Date().toISOString(), products }, null, 2);
+}
+
+function persist({ publish = true } = {}) {
+  localStorage.setItem(STORAGE_KEY, buildConfigPayload());
+  if (publish) publishSharedConfig().catch((error) => setSyncStatus(`本机已保存，共享发布失败：${error.message}`));
+}
+
+async function publishSharedConfig() {
+  const location = syncUrlEl.value.trim();
+  if (!isDesktopApp || !location || /^https?:\/\//i.test(location)) return false;
+  await window.huazaiDesktop.writeSyncFile(location, buildConfigPayload());
+  setSyncStatus("已保存到团队共享配置，其他安装者点击“更新”即可同步。");
+  return true;
+}
+
+function setSyncStatus(message) {
+  syncStatusEl.textContent = message;
 function persist() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ updatedAt: new Date().toISOString(), products }, null, 2));
 }
@@ -126,6 +158,12 @@ function renderCards() {
 
 function openResource(label, url) {
   if (!url) return;
+  const isCloudLink = label === CLOUD_LINK_LABEL;
+  const targetUrl = isCloudLink || isDesktopApp ? url.trim() : toLocalResourceUrl(url);
+  if (isDesktopApp) {
+    window.huazaiDesktop.openResource({ label, url: targetUrl, isCloudLink }).catch((error) => alert(error.message));
+    return;
+  }
   const targetUrl = label === CLOUD_LINK_LABEL ? url : toLocalResourceUrl(url);
   window.open(targetUrl, "_blank", "noopener,noreferrer");
 }
@@ -168,6 +206,7 @@ function renderLinkFields() {
     field.textContent = label;
     const input = document.createElement("input");
     input.name = label;
+    input.placeholder = label === CLOUD_LINK_LABEL ? "填写在线网盘分享 URL" : "填写本地 NAS / 共享盘文件夹路径";
     input.placeholder = label === CLOUD_LINK_LABEL ? "填写在线网盘分享 URL" : "填写本地 NAS / 共享盘路径或 file:// 地址";
     field.append(input);
     linkFieldsEl.append(field);
@@ -251,12 +290,28 @@ function deleteCard() {
   dialog.close();
 }
 
+async function readSyncPayload(url) {
+  if (isDesktopApp && !/^https?:\/\//i.test(url)) {
+    return JSON.parse(await window.huazaiDesktop.readSyncFile(url));
+  }
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) throw new Error(`同步失败：${response.status}`);
+  return response.json();
+}
+
 async function updateFromRemote() {
   const url = syncUrlEl.value.trim();
   if (!url) {
     alert("请先填写并保存团队同步地址。");
     return;
   }
+  const payload = await readSyncPayload(url);
+  const nextProducts = Array.isArray(payload) ? payload : payload.products;
+  if (!Array.isArray(nextProducts)) throw new Error("同步文件格式错误，需要 products 数组。");
+  products = nextProducts.map(normalizeProduct);
+  persist({ publish: false });
+  renderCards();
+  setSyncStatus("更新完成，已同步最新产品卡片。");
   const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) throw new Error(`同步失败：${response.status}`);
   const payload = await response.json();
@@ -269,6 +324,7 @@ async function updateFromRemote() {
 }
 
 function exportConfig() {
+  const blob = new Blob([buildConfigPayload()], { type: "application/json" });
   const blob = new Blob([JSON.stringify({ updatedAt: new Date().toISOString(), products }, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -287,6 +343,29 @@ async function importConfig(file) {
   renderCards();
 }
 
+function applyTheme(theme) {
+  const nextTheme = theme === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = nextTheme;
+  localStorage.setItem(THEME_KEY, nextTheme);
+  themeToggleBtn.textContent = nextTheme === "dark" ? "浅色模式" : "深色模式";
+}
+
+function renderDesktopState() {
+  document.documentElement.classList.toggle("is-desktop", isDesktopApp);
+  if (!isDesktopApp) setSyncStatus("建议使用桌面端窗口运行；浏览器模式仅支持读取 HTTP/相对 JSON。 ");
+}
+
+async function chooseSyncFile() {
+  if (!isDesktopApp) return;
+  const filePath = await window.huazaiDesktop.chooseSyncFile();
+  if (!filePath) return;
+  syncUrlEl.value = filePath;
+  localStorage.setItem(SYNC_KEY, filePath);
+  await publishSharedConfig();
+}
+
+document.querySelector("#appSettingsBtn").addEventListener("click", () => document.querySelector("#settingsDialog").showModal());
+themeToggleBtn.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 document.querySelector("#appSettingsBtn").addEventListener("click", () => document.querySelector("#settingsDialog").showModal());
 document.querySelector("#newCardBtn").addEventListener("click", () => openDialog());
 document.querySelector("#saveCardBtn").addEventListener("click", saveCard);
@@ -297,6 +376,11 @@ document.querySelector("#productImage").addEventListener("change", (event) => {
 });
 document.querySelector("#saveSyncBtn").addEventListener("click", () => {
   localStorage.setItem(SYNC_KEY, syncUrlEl.value.trim());
+  publishSharedConfig().then((published) => {
+    alert(published ? "同步地址已保存，当前配置已发布。" : "同步地址已保存；HTTP 地址支持更新读取，不能由客户端直接写回。");
+  });
+});
+chooseSyncFileBtn.addEventListener("click", () => chooseSyncFile().catch((error) => alert(error.message)));
   alert("同步地址已保存。");
 });
 document.querySelector("#updateBtn").addEventListener("click", () => updateFromRemote().catch((error) => alert(error.message)));

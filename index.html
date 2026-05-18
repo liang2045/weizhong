@@ -3,66 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>花再产品库</title>
+    <title>产品资源卡片中心</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="app-header">
       <div>
-        <p class="eyebrow">Huazai Product Library</p>
-        <h1>花再产品库</h1>
-        <p class="subtitle">用统一卡片快速打开本地 NAS 资源、网盘链接和产品资料。</p>
+        <p class="eyebrow">Resource Hub</p>
+        <h1>产品资源卡片中心</h1>
+        <p class="subtitle">用统一卡片快速打开详情页、主图、SKU、白底图、网盘链接和产品资料。</p>
       </div>
       <div class="header-actions">
-        <button id="appSettingsBtn" class="btn btn-secondary" type="button">设置</button>
         <button id="updateBtn" class="btn btn-secondary" type="button">更新</button>
         <button id="newCardBtn" class="btn btn-primary" type="button">新建卡片</button>
       </div>
     </header>
 
     <main>
+      <section class="sync-panel" aria-label="同步配置">
+        <label for="syncUrl">团队同步地址</label>
+        <div class="sync-row">
+          <input id="syncUrl" type="url" placeholder="例如：https://company.example.com/products.json 或 ./products.json" />
+          <button id="saveSyncBtn" class="btn btn-dark" type="button">保存地址</button>
+        </div>
+        <p>管理员把导出的产品 JSON 放到共享地址，其他同事点击“更新”即可同步新增或修改的卡片。</p>
+      </section>
+
       <section class="toolbar" aria-label="列表工具栏">
         <div>
           <strong id="cardCount">0 个产品</strong>
-          <span>点击右上角“设置”可配置团队同步地址、查看拖动说明、导入或导出配置。</span>
+          <span>拖动卡片或使用上移/下移按钮调整位置。</span>
+        </div>
+        <div class="toolbar-actions">
+          <button id="exportBtn" class="link-button" type="button">导出配置</button>
+          <label class="link-button file-label" for="importInput">导入配置</label>
+          <input id="importInput" type="file" accept="application/json" hidden />
         </div>
       </section>
 
       <section id="cards" class="cards" aria-live="polite"></section>
       <p id="emptyState" class="empty-state" hidden>还没有产品卡片，请点击“新建卡片”开始配置。</p>
     </main>
-
-    <dialog id="settingsDialog" class="dialog settings-dialog">
-      <form method="dialog" class="dialog-card">
-        <div class="dialog-header">
-          <div>
-            <p class="eyebrow">App settings</p>
-            <h2>花再产品库设置</h2>
-          </div>
-          <button class="icon-button" value="cancel" aria-label="关闭" type="submit">×</button>
-        </div>
-
-        <section class="settings-section" aria-label="团队同步地址">
-          <h3>团队同步地址</h3>
-          <p>管理员把导出的产品 JSON 放到共享地址，其他同事点击“更新”即可同步新增或修改的卡片。</p>
-          <label for="syncUrl">同步 JSON 地址</label>
-          <div class="sync-row">
-            <input id="syncUrl" type="url" placeholder="例如：https://company.example.com/products.json 或 ./products.json" />
-            <button id="saveSyncBtn" class="btn btn-dark" type="button">保存地址</button>
-          </div>
-        </section>
-
-        <section class="settings-section" aria-label="拖动产品说明和导入导出配置">
-          <h3>拖动产品说明 / 导入导出配置</h3>
-          <p>在产品列表中拖动卡片，或使用卡片右下角的上移/下移按钮调整产品位置；调整后会自动保存在本机。</p>
-          <div class="toolbar-actions settings-actions">
-            <button id="exportBtn" class="link-button" type="button">导出配置</button>
-            <label class="link-button file-label" for="importInput">导入配置</label>
-            <input id="importInput" type="file" accept="application/json" hidden />
-          </div>
-        </section>
-      </form>
-    </dialog>
 
     <dialog id="cardDialog" class="dialog">
       <form id="cardForm" method="dialog" class="dialog-card">
@@ -95,7 +76,6 @@
 
         <fieldset>
           <legend>按钮地址配置</legend>
-          <p class="field-hint">除“网盘链接”外，请优先填写本地 NAS / 共享盘路径，例如 <code>\\NAS\Products\A1</code>、<code>Z:\Products\A1</code> 或 <code>file:///Volumes/NAS/Products/A1</code>。</p>
           <div id="linkFields" class="link-fields"></div>
         </fieldset>
 
@@ -111,10 +91,8 @@
 
     <template id="cardTemplate">
       <article class="product-card" draggable="true">
-        <div class="product-identity">
-          <div class="image-wrap">
-            <img class="product-image" alt="" />
-          </div>
+        <div class="image-wrap">
+          <img class="product-image" alt="" />
           <div class="product-meta">
             <h3></h3>
             <p></p>

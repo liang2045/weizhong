@@ -2,7 +2,6 @@ const STORAGE_KEY = "product-resource-cards:v1";
 const SYNC_KEY = "product-resource-sync-url:v1";
 
 const RESOURCE_BUTTONS = ["详情页", "主图", "SKU", "白底图", "网盘链接", "产品资料"];
-const CLOUD_LINK_LABEL = "网盘链接";
 
 const placeholderSvg = encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
@@ -23,7 +22,7 @@ const sampleProducts = [
     price: "定价：¥299 / 批发价详询",
     image: PLACEHOLDER_IMAGE,
     links: {
-      "详情页": "file:///Volumes/NAS/Products/A1/detail",
+      "详情页": "https://example.com/product/a1",
       "主图": "file:///Volumes/NAS/Products/A1/main-image",
       "SKU": "file:///Volumes/NAS/Products/A1/sku",
       "白底图": "file:///Volumes/NAS/Products/A1/white-bg",
@@ -100,7 +99,7 @@ function renderCards() {
       button.textContent = label;
       button.disabled = !product.links[label];
       button.title = product.links[label] || "请先在设置中配置地址";
-      button.addEventListener("click", () => openResource(label, product.links[label]));
+      button.addEventListener("click", () => openResource(product.links[label]));
       buttonGrid.append(button);
     });
 
@@ -124,22 +123,9 @@ function renderCards() {
   });
 }
 
-function openResource(label, url) {
+function openResource(url) {
   if (!url) return;
-  const targetUrl = label === CLOUD_LINK_LABEL ? url : toLocalResourceUrl(url);
-  window.open(targetUrl, "_blank", "noopener,noreferrer");
-}
-
-function toLocalResourceUrl(rawUrl) {
-  const url = rawUrl.trim();
-  if (/^file:\/\//i.test(url)) return url;
-  if (/^\\/.test(url)) {
-    return `file://///${url.replace(/^\\+/, "").replaceAll("\\", "/")}`;
-  }
-  if (/^[a-zA-Z]:\\/.test(url)) {
-    return `file:///${url.replaceAll("\\", "/")}`;
-  }
-  return url;
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 function moveCard(id, direction) {
@@ -168,7 +154,7 @@ function renderLinkFields() {
     field.textContent = label;
     const input = document.createElement("input");
     input.name = label;
-    input.placeholder = label === CLOUD_LINK_LABEL ? "填写在线网盘分享 URL" : "填写本地 NAS / 共享盘路径或 file:// 地址";
+    input.placeholder = "填写本地 NAS 地址、file:// 地址或网盘 URL";
     field.append(input);
     linkFieldsEl.append(field);
   });
@@ -287,7 +273,6 @@ async function importConfig(file) {
   renderCards();
 }
 
-document.querySelector("#appSettingsBtn").addEventListener("click", () => document.querySelector("#settingsDialog").showModal());
 document.querySelector("#newCardBtn").addEventListener("click", () => openDialog());
 document.querySelector("#saveCardBtn").addEventListener("click", saveCard);
 document.querySelector("#deleteBtn").addEventListener("click", deleteCard);

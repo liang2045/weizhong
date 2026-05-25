@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>花再产品库</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="window-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Huazai Product Library</p>
+        <h1>花再产品库</h1>
+      </div>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="btn btn-secondary" type="button">深色模式</button>
+        <button id="appSettingsBtn" class="btn btn-secondary" type="button">设置</button>
+        <button id="updateBtn" class="btn btn-secondary" type="button">更新</button>
+        <button id="newCardBtn" class="btn btn-primary" type="button">新建卡片</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="toolbar" aria-label="列表工具栏">
+        <div>
+          <strong id="cardCount">0 个产品</strong>
+          <span id="syncStatus">桌面窗口可缩放；任意客户端保存到共享配置后，其他安装者点击“更新”同步。</span>
+        </div>
+      </section>
+
+      <section id="cards" class="cards" aria-live="polite"></section>
+      <p id="emptyState" class="empty-state" hidden>还没有产品卡片，请点击“新建卡片”开始配置。</p>
+    </main>
+
+    <dialog id="settingsDialog" class="dialog settings-dialog">
+      <form method="dialog" class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">App settings</p>
+            <h2>花再产品库设置</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="关闭" type="submit">×</button>
+        </div>
+
+        <section class="settings-section" aria-label="团队同步地址">
+          <h3>团队同步地址</h3>
+          <p>填写团队共享的 <code>products.json</code> 文件路径或 HTTP 地址。桌面端任意客户端新增、编辑、排序或导入后，会自动写回这个共享配置；其他安装者点击“更新”即可同步卡片信息。</p>
+          <label for="syncUrl">共享配置文件 / JSON 地址</label>
+          <div class="sync-row">
+            <input id="syncUrl" placeholder="例如：Z:\Huazai\products.json、\\NAS\Huazai\products.json 或 https://company.example.com/products.json" />
+            <button id="chooseSyncFileBtn" class="btn btn-secondary desktop-only" type="button">选择文件</button>
+            <button id="saveSyncBtn" class="btn btn-dark" type="button">保存并发布</button>
+          </div>
+        </section>
+
+        <section class="settings-section" aria-label="拖动产品说明和导入导出配置">
+          <h3>拖动产品说明 / 导入导出配置</h3>
+          <p>在产品列表中拖动卡片，或使用卡片右下角的上移/下移按钮调整产品位置；调整后会自动保存在本机。</p>
+          <div class="toolbar-actions settings-actions">
+            <button id="exportBtn" class="link-button" type="button">导出配置</button>
+            <label class="link-button file-label" for="importInput">导入配置</label>
+            <input id="importInput" type="file" accept="application/json" hidden />
+          </div>
+        </section>
+      </form>
+    </dialog>
+
+    <dialog id="cardDialog" class="dialog">
+      <form id="cardForm" method="dialog" class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Card settings</p>
+            <h2 id="dialogTitle">设置产品卡片</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="关闭" type="submit">×</button>
+        </div>
+
+        <input id="editingId" type="hidden" />
+
+        <div class="form-grid">
+          <label>
+            产品名
+            <input id="productName" required maxlength="80" placeholder="请输入品名" />
+          </label>
+          <label>
+            定价文字
+            <input id="productPrice" maxlength="80" placeholder="例如：¥299 / FOB $19.9" />
+          </label>
+        </div>
+
+        <label>
+          产品图上传
+          <input id="productImage" type="file" accept="image/*" />
+        </label>
+        <div id="imagePreview" class="image-preview">未上传图片时会显示默认占位图</div>
+
+        <fieldset>
+          <legend>按钮地址配置</legend>
+          <p class="field-hint">除“网盘链接”外，请填写本地 NAS / 共享盘文件夹地址，点击按钮会直接弹出本地文件夹，例如 <code>\\NAS\Products\A1</code>、<code>Z:\Products\A1</code> 或 <code>/Volumes/NAS/Products/A1</code>。</p>
+          <div id="linkFields" class="link-fields"></div>
+        </fieldset>
+
+        <section id="deleteCardSection" class="danger-section" hidden>
+          <div>
+            <h3>删除卡片</h3>
+            <p>从产品库中移除这张卡片，并同步到团队共享配置。</p>
+          </div>
+          <button id="deleteBtn" class="btn btn-danger" type="button">删除卡片</button>
+        </section>
+
+        <div class="dialog-actions">
+          <div></div>
+          <div>
+            <button class="btn btn-secondary" value="cancel" type="submit">取消</button>
+            <button id="saveCardBtn" class="btn btn-primary" type="button">保存</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <template id="cardTemplate">
+      <article class="product-card" draggable="true">
+        <div class="product-identity">
+          <div class="image-wrap">
+            <img class="product-image" alt="" />
+          </div>
+          <div class="product-meta">
+            <h3></h3>
+            <p></p>
+          </div>
+        </div>
+        <div class="button-grid"></div>
+        <div class="card-controls">
+          <button class="move-btn" data-direction="up" type="button" aria-label="上移">↑</button>
+          <button class="move-btn" data-direction="down" type="button" aria-label="下移">↓</button>
+          <button class="settings-btn" type="button" aria-label="设置">⚙</button>
+        </div>
+      </article>
+    </template>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
